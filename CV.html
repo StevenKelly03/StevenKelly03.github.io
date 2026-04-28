@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steven Kelly — Game Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0d1117;
+    --bg2:      #161b22;
+    --bg3:      #1c2128;
+    --bg4:      #21262d;
+    --border:   #30363d;
+    --border2:  #444c56;
+    --text:     #e6edf3;
+    --text2:    #adbac7;
+    --muted:    #545d68;
+    --blue:     #4493f8;
+    --blue-dim: #1f3a5c;
+    --green:    #3fb950;
+    --green-dim:#1a3a25;
+    --amber:    #d29922;
+    --red:      #f85149;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --sidebar-w: 240px;
+  }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 400;
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    z-index: 50;
+  }
+
+  .sidebar-top {
+    padding: 1.5rem 1.25rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-name {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.35rem;
+    letter-spacing: 0.01em;
+  }
+  .sidebar-role {
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .sidebar-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.8rem;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--green);
+    background: var(--green-dim);
+    border: 1px solid rgba(63,185,80,0.3);
+    padding: 0.25rem 0.6rem;
+    border-radius: 2rem;
+  }
+  .sidebar-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .sidebar-section {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-section-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 1.25rem 0.5rem;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.42rem 1.25rem;
+    font-size: 0.78rem;
+    color: var(--text2);
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    cursor: pointer;
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover {
+    background: var(--bg3);
+    color: var(--text);
+    border-left-color: var(--blue);
+  }
+  .nav-item.active {
+    background: var(--bg3);
+    color: var(--blue);
+    border-left-color: var(--blue);
+  }
+  .nav-icon {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    min-width: 14px;
+  }
+
+  .sidebar-meta {
+    margin-top: auto;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+    font-family: var(--mono);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .meta-row a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .meta-row a:hover { color: var(--blue); }
+  .meta-label { color: var(--border2); flex-shrink: 0; }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    position: sticky; top: 0;
+    background: rgba(13,17,23,0.9);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2.5rem;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 40;
+  }
+  .topbar-path {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .topbar-path span { color: var(--text2); }
+  .topbar-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .topbar-btn {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--text2);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 0.35rem 0.9rem;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    cursor: pointer;
+  }
+  .topbar-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-dim); }
+  .topbar-btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .topbar-btn.primary:hover { background: #5aa3ff; border-color: #5aa3ff; color: #fff; }
+
+  /* CONTENT */
+  .content { padding: 2.5rem; max-width: 900px; }
+
+  /* HERO BLOCK */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    align-items: start;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.1s forwards;
+  }
+  .hero-name {
+    font-family: var(--mono);
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+  }
+  .hero-sub {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+    font-family: var(--mono);
+    letter-spacing: 0.03em;
+  }
+  .hero-desc {
+    font-size: 0.88rem;
+    color: var(--text2);
+    line-height: 1.75;
+    max-width: 520px;
+  }
+  .hero-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: flex-end;
+  }
+  .stat-pill {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text2);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.8rem;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .stat-pill .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot-blue { background: var(--blue); }
+  .dot-green { background: var(--green); }
+  .dot-amber { background: var(--amber); }
+
+  /* SECTION WRAPPERS */
+  .cv-section {
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s, transform 0.5s;
+  }
+  .cv-section.in { opacity: 1; transform: none; }
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-head-title {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0.05em;
+  }
+  .section-head-title .prefix { color: var(--muted); margin-right: 0.3em; }
+  .section-badge {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    color: var(--blue);
+    background: var(--blue-dim);
+    border: 1px solid rgba(68,147,248,0.3);
+    padding: 0.15rem 0.5rem;
+    border-radius: 2rem;
+    margin-left: auto;
+  }
+
+  /* SKILLS GRID */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .skill-block-title {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.9rem;
+  }
+  .skill-item {
+    margin-bottom: 0.75rem;
+  }
+  .skill-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.35rem;
+  }
+  .skill-name {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: var(--text2);
+  }
+  .skill-val {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--muted);
+  }
+  .skill-bar {
+    height: 3px;
+    background: var(--bg4);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .skill-fill {
+    height: 100%;
+    background: var(--blue);
+    width: 0;
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+    border-radius: 1px;
+  }
+
+  .tag-grid { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    color: var(--text2);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.65rem;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .tag:hover { border-color: var(--blue); color: var(--blue); }
+  .tag-green { color: var(--green); background: var(--green-dim); border-color: rgba(63,185,80,0.3); }
+  .tag-amber { color: var(--amber); background: rgba(210,153,34,0.12); border-color: rgba(210,153,34,0.3); }
+
+  /* PROJECTS */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .project-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--blue);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .project-card:hover { border-color: var(--border2); background: var(--bg3); }
+  .project-card:hover::before { transform: scaleX(1); }
+  .project-card.span2 { grid-column: 1 / -1; }
+  .project-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 0.6rem;
+  }
+  .project-card-name {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .project-card-year {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--muted);
+  }
+  .project-card-desc {
+    font-size: 0.78rem;
+    color: var(--text2);
+    line-height: 1.65;
+    margin-bottom: 1rem;
+  }
+
+  /* TIMELINE (edu + exp) */
+  .timeline { position: relative; }
+  .tl-item {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 1.5rem;
+    padding: 1.2rem 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .tl-item:first-child { border-top: 1px solid var(--border); }
+  .tl-date {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--muted);
+    line-height: 1.5;
+    padding-top: 0.2rem;
+  }
+  .tl-date .tl-active {
+    display: inline-block;
+    font-size: 0.58rem;
+    color: var(--green);
+    background: var(--green-dim);
+    border: 1px solid rgba(63,185,80,0.3);
+    padding: 0.1rem 0.45rem;
+    border-radius: 2rem;
+    margin-top: 0.3rem;
+  }
+  .tl-title {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+  .tl-sub {
+    font-size: 0.75rem;
+    color: var(--blue);
+    margin-bottom: 0.6rem;
+    font-family: var(--mono);
+  }
+  .tl-bullets { list-style: none; }
+  .tl-bullets li {
+    font-size: 0.78rem;
+    color: var(--text2);
+    line-height: 1.6;
+    padding-left: 1.1rem;
+    position: relative;
+    margin-bottom: 0.2rem;
+  }
+  .tl-bullets li::before {
+    content: '›';
+    position: absolute; left: 0;
+    color: var(--muted);
+  }
+  .tl-loc {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+  }
+
+  /* FOOTER */
+  .content-footer {
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--muted);
+    opacity: 0;
+    animation: fadeUp 0.5s 1s forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(12px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .content { padding: 1.25rem; }
+    .hero { grid-template-columns: 1fr; }
+    .hero-stats { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+    .skills-grid, .projects-grid { grid-template-columns: 1fr; }
+    .project-card.span2 { grid-column: 1; }
+    .tl-item { grid-template-columns: 1fr; gap: 0.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-top">
+    <div class="sidebar-name">Steven Kelly</div>
+    <div class="sidebar-role">Game Developer<br>Software Engineer</div>
+    <div class="sidebar-badge">Available for hire</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Navigation</div>
+    <a href="#overview" class="nav-item active">
+      <span class="nav-icon">~/</span> Overview
+    </a>
+    <a href="#skills" class="nav-item">
+      <span class="nav-icon">{ }</span> Skills
+    </a>
+    <a href="#projects" class="nav-item">
+      <span class="nav-icon">[ ]</span> Projects
+    </a>
+    <a href="#education" class="nav-item">
+      <span class="nav-icon">★</span> Education
+    </a>
+    <a href="#experience" class="nav-item">
+      <span class="nav-icon">▸</span> Experience
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Stack</div>
+    <a class="nav-item"><span class="nav-icon" style="color:var(--blue)">●</span> C++ / SFML 3.x</a>
+    <a class="nav-item"><span class="nav-icon" style="color:var(--green)">●</span> C# / Unity</a>
+    <a class="nav-item"><span class="nav-icon" style="color:var(--amber)">●</span> GDScript / Godot</a>
+    <a class="nav-item"><span class="nav-icon" style="color:var(--muted)">●</span> JS / HTML / CSS</a>
+    <a class="nav-item"><span class="nav-icon" style="color:var(--muted)">●</span> MySQL / MariaDB</a>
+  </div>
+
+  <div class="sidebar-meta">
+    <div class="meta-row"><span class="meta-label">email</span><a href="mailto:stevenkelly3310@gmail.com">stevenkelly3310@gmail.com</a></div>
+    <div class="meta-row"><span class="meta-label">tel&nbsp;&nbsp;&nbsp;</span><a href="tel:0852828342">085 282 8342</a></div>
+    <div class="meta-row"><span class="meta-label">loc&nbsp;&nbsp;&nbsp;</span>Carlow, Ireland</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-path">
+      steven-kelly / <span>cv</span> / README.md
+    </div>
+    <div class="topbar-actions">
+      <a href="mailto:stevenkelly3310@gmail.com" class="topbar-btn">Contact</a>
+      <a href="#" class="topbar-btn primary">Download PDF</a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- HERO -->
+    <div class="hero" id="overview">
+      <div>
+        <div class="hero-name">Steven Kelly</div>
+        <div class="hero-sub">Game Developer &amp; Software Engineer</div>
+        <p class="hero-desc">
+          Motivated developer with a strong foundation in software engineering. Proficient in C++, C#, and GDScript — building games and interactive experiences across Unity, Godot 4, and SFML. Focused on clean architecture, real gameplay feel, and systems that scale.
+        </p>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-pill"><span class="dot dot-blue"></span>C++ / C# / GDScript</div>
+        <div class="stat-pill"><span class="dot dot-green"></span>Unity · Godot · SFML</div>
+        <div class="stat-pill"><span class="dot dot-amber"></span>SETU Carlow · BSc</div>
+      </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div class="cv-section" id="skills">
+      <div class="section-head">
+        <div class="section-head-title"><span class="prefix">#</span> skills</div>
+        <span class="section-badge">technical + professional</span>
+      </div>
+      <div class="skills-grid">
+        <div>
+          <div class="skill-block-title">Languages &amp; Engines</div>
+          <div class="tag-grid">
+            <span class="tag tag-blue">C++</span>
+            <span class="tag tag-blue">C#</span>
+            <span class="tag tag-blue">GDScript</span>
+            <span class="tag tag-blue">JavaScript</span>
+            <span class="tag tag-blue">HTML / CSS</span>
+            <span class="tag tag-blue">SQL</span>
+            <span class="tag">SFML 3.x</span>
+            <span class="tag">Unity 6</span>
+            <span class="tag">Godot 4</span>
+            <span class="tag">MySQL</span>
+            <span class="tag">MariaDB</span>
+            <span class="tag">WinSCard API</span>
+            <span class="tag">Mirror Networking</span>
+            <span class="tag">OOP</span>
+            <span class="tag">Data Structures</span>
+          </div>
+        </div>
+        <div>
+          <div class="skill-block-title">Concepts &amp; Professional</div>
+          <div class="tag-grid" style="margin-bottom:1.2rem">
+            <span class="tag tag-green">Game Physics &amp; Logic</span>
+            <span class="tag tag-green">OOP Architecture</span>
+            <span class="tag tag-green">FSM / Decision Trees / GOAP</span>
+            <span class="tag tag-green">Multiplayer / Networking</span>
+            <span class="tag tag-green">VFX / Particle Systems</span>
+            <span class="tag tag-green">Database Design</span>
+          </div>
+          <div class="skill-block-title" style="margin-top:0.5rem">Professional</div>
+          <div class="tag-grid">
+            <span class="tag">Analytical Problem Solving</span>
+            <span class="tag">Team Collaboration</span>
+            <span class="tag">Self-Motivation</span>
+            <span class="tag">Client-Focused</span>
+            <span class="tag">Independent Work</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="cv-section" id="projects">
+      <div class="section-head">
+        <div class="section-head-title"><span class="prefix">#</span> projects</div>
+        <span class="section-badge">3 repos</span>
+      </div>
+      <div class="projects-grid">
+        <div class="project-card span2" onclick="window.open('https://github.com/StevenKelly03/Binhale-Web_Build')" style="cursor:pointer">
+          <div class="project-card-head">
+            <span class="project-card-name">BINHALE</span>
+            <span class="project-card-year">2024 – 2025</span>
+          </div>
+          <p class="project-card-desc">Year 3 final project — environmentally-themed game centred around consumption and waste management. Built a resource management system in GDScript with object-oriented logic tracking environmental variables and player interactions in real-time. Demonstrates game state architecture, systems design, and data-driven gameplay.</p>
+          <div class="tag-grid">
+            <span class="tag tag-amber">GDScript</span>
+            <span class="tag tag-amber">Godot 4</span>
+            <span class="tag">OOP</span>
+            <span class="tag">Resource Systems</span>
+            <span class="tag">Game State Mgmt</span>
+          </div>
+        </div>
+        <div class="project-card" onclick="window.open('https://github.com/StevenKelly03/Echo-Tactics')" style="cursor:pointer">
+          <div class="project-card-head">
+            <span class="project-card-name">ECHO TACTICS</span>
+            <span class="project-card-year">2024 – ongoing</span>
+          </div>
+          <p class="project-card-desc">2D top-down dungeon crawler built with SFML 3.x and the WinSCard API. Features three distinct AI architectures across enemy types: FSMs for Grunts, Decision Trees for Elites, and GOAP for the Boss NPC. Modular class design with separate systems for textures, collisions, HUD, and a live debug overlay.</p>
+          <div class="tag-grid">
+            <span class="tag tag-blue">C++</span>
+            <span class="tag tag-blue">SFML 3.x</span>
+            <span class="tag tag-blue">WinSCard API</span>
+            <span class="tag">FSM</span>
+            <span class="tag">Decision Trees</span>
+            <span class="tag">GOAP</span>
+          </div>
+        </div>
+        <div class="project-card" onclick="window.open('https://github.com/Danny-delaney/SnowWayOut')" style="cursor:pointer">
+          <div class="project-card-head">
+            <span class="project-card-name">SNOW WAY OUT</span>
+            <span class="project-card-year">2024</span>
+          </div>
+          <p class="project-card-desc">Unity 6 multiplayer game with Mirror networking — synchronised HP via SyncVar, snowball projectile collision, ClientRpc respawn logic, and a VFX Graph snow particle system parented to the camera. Built in collaboration with Danny Delaney, with responsibilities split evenly across all systems.</p>
+          <div class="tag-grid">
+            <span class="tag tag-green">C#</span>
+            <span class="tag tag-green">Unity 6</span>
+            <span class="tag">Mirror</span>
+            <span class="tag">VFX Graph</span>
+            <span class="tag">2-person team</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDUCATION -->
+    <div class="cv-section" id="education">
+      <div class="section-head">
+        <div class="section-head-title"><span class="prefix">#</span> education</div>
+      </div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-date">
+            Sep 2022 – Present
+            <div class="tl-active">active</div>
+          </div>
+          <div>
+            <div class="tl-title">SETU Carlow Campus</div>
+            <div class="tl-sub">BSc (Hons) Computer Games Development</div>
+            <div class="tag-grid">
+              <span class="tag">Game Dev</span>
+              <span class="tag">Software Eng</span>
+              <span class="tag">C++ · C# · GDScript</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPERIENCE -->
+    <div class="cv-section" id="experience">
+      <div class="section-head">
+        <div class="section-head-title"><span class="prefix">#</span> experience</div>
+        <span class="section-badge">2 positions</span>
+      </div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-date">Aug 2020</div>
+          <div>
+            <div class="tl-title">B.C. Manufacturing Ltd.</div>
+            <div class="tl-sub">General Line Worker</div>
+            <ul class="tl-bullets">
+              <li>Cut and packaged 20kg cheese blocks to specification for retail distribution</li>
+              <li>Operated within strict health &amp; safety standards throughout production runs</li>
+              <li>Maintained consistent output in a fast-paced manufacturing environment</li>
+            </ul>
+            <div class="tl-loc">Freshford, Co. Kilkenny</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">Nov 2018</div>
+          <div>
+            <div class="tl-title">SuperValu</div>
+            <div class="tl-sub">Floor Staff · Work Experience</div>
+            <ul class="tl-bullets">
+              <li>Restocked and organised product displays across the shop floor</li>
+              <li>Maintained cleanliness and safety in a customer-facing retail environment</li>
+            </ul>
+            <div class="tl-loc">Ballyragget, Co. Kilkenny</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-footer">
+      <span>Steven Kelly · Game Developer · Carlow, Ireland</span>
+      <span>stevenkelly3310@gmail.com · 085 282 8342</span>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('in');
+      e.target.querySelectorAll('.skill-fill').forEach(b => {
+        b.style.width = b.dataset.w + '%';
+      });
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.cv-section').forEach(el => io.observe(el));
+
+  // Active nav highlight on scroll
+  const sections = document.querySelectorAll('[id]');
+  const navItems = document.querySelectorAll('.nav-item');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navItems.forEach(n => n.classList.remove('active'));
+        const match = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+        if (match) match.classList.add('active');
+      }
+    });
+  }, { threshold: 0.5, rootMargin: '-20% 0px -60% 0px' });
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
